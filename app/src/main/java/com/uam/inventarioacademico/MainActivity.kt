@@ -15,6 +15,10 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.room.Room
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 import com.uam.inventarioacademico.data.local.AppDatabase
 import com.uam.inventarioacademico.ui.features.dashboard.DashboardScreen
 import com.uam.inventarioacademico.ui.features.dashboard.DashboardViewModel
@@ -31,7 +35,6 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // Inicializar la base de datos
         val db = Room.databaseBuilder(
             applicationContext,
             AppDatabase::class.java, "inventario-db"
@@ -39,6 +42,17 @@ class MainActivity : ComponentActivity() {
         
         val equipoDao = db.equipoDao()
         val prestamoDao = db.prestamoDao()
+
+        lifecycleScope.launch(Dispatchers.IO) {
+            val equiposActuales = equipoDao.getAllEquipos().first()
+            if (equiposActuales.isEmpty()) {
+                equipoDao.insertEquipo("Laptop Dell Latitude 7420", "Computadoras", "Dell", "DL-7420-1A", true)
+                equipoDao.insertEquipo("MacBook Pro M2", "Computadoras", "Apple", "MBP-M2-99B", true)
+                equipoDao.insertEquipo("Proyector Epson 1080p", "Audiovisual", "Epson", "EP-1080-X", true)
+                equipoDao.insertEquipo("Monitor LG 27''", "Periféricos", "LG", "LG27-334", true)
+                equipoDao.insertEquipo("Cable HDMI 5m", "Accesorios", "Genérico", "HD-5M-001", true)
+            }
+        }
 
         enableEdgeToEdge()
         setContent {
