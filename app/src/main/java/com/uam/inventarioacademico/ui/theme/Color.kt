@@ -1,4 +1,4 @@
-package com.uam.inventarioacademico.ui.theme
+﻿package com.uam.inventarioacademico.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
