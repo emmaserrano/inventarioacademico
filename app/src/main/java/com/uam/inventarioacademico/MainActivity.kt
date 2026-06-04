@@ -5,43 +5,36 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
-import com.uam.inventarioacademico.ui.theme.InventarioAcademicoTheme
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.room.Room
+import com.uam.inventarioacademico.data.local.AppDatabase
+import com.uam.inventarioacademico.ui.features.equipos.EquiposListScreen
+import com.uam.inventarioacademico.ui.features.equipos.EquiposViewModel
+import com.uam.inventarioacademico.ui.features.equipos.EquiposViewModelFactory
+import com.uam.inventarioacademico.ui.theme.MyApplicationTheme
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // Inicializar la base de datos de manera sencilla para este ejemplo
+        val db = Room.databaseBuilder(
+            applicationContext,
+            AppDatabase::class.java, "inventario-db"
+        ).build()
+        val equipoDao = db.equipoDao()
+
         enableEdgeToEdge()
         setContent {
-            InventarioAcademicoTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(
-                        name = "Android",
-                        modifier = Modifier.padding(innerPadding)
-                    )
+            MyApplicationTheme {
+                Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
+                    val viewModel: EquiposViewModel = viewModel(factory = EquiposViewModelFactory(equipoDao))
+                    EquiposListScreen(viewModel = viewModel)
                 }
             }
         }
-    }
-}
-
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    InventarioAcademicoTheme {
-        Greeting("Android")
     }
 }
