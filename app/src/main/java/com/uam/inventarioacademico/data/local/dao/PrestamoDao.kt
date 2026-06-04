@@ -1,4 +1,4 @@
-﻿package com.uam.inventarioacademico.data.local.dao
+package com.uam.inventarioacademico.data.local.dao
 
 import androidx.room.Dao
 import androidx.room.Query
@@ -7,7 +7,7 @@ import com.uam.inventarioacademico.data.local.entity.PrestamoEntity
 @Dao
 interface PrestamoDao{
     @Query("SELECT * FROM prestamo")
-    fun getAllPrestamos(): List<PrestamoEntity>
+    fun getAllPrestamos(): kotlinx.coroutines.flow.Flow<List<PrestamoEntity>>
 
     @Query("SELECT * FROM prestamo WHERE id = :id")
     fun loadPrestamoById(id: Int): PrestamoEntity

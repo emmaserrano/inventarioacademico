@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Build
+import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.List
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -15,6 +16,9 @@ import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.room.Room
 import com.uam.inventarioacademico.data.local.AppDatabase
+import com.uam.inventarioacademico.ui.features.dashboard.DashboardScreen
+import com.uam.inventarioacademico.ui.features.dashboard.DashboardViewModel
+import com.uam.inventarioacademico.ui.features.dashboard.DashboardViewModelFactory
 import com.uam.inventarioacademico.ui.features.equipos.EquiposListScreen
 import com.uam.inventarioacademico.ui.features.equipos.EquiposViewModel
 import com.uam.inventarioacademico.ui.features.equipos.EquiposViewModelFactory
@@ -39,12 +43,18 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             MyApplicationTheme {
-                var currentScreen by remember { mutableStateOf("equipos") }
+                var currentScreen by remember { mutableStateOf("dashboard") }
                 
                 Scaffold(
                     modifier = Modifier.fillMaxSize(),
                     bottomBar = {
                         NavigationBar {
+                            NavigationBarItem(
+                                icon = { Icon(Icons.Default.Home, contentDescription = "Dashboard") },
+                                label = { Text("Resumen") },
+                                selected = currentScreen == "dashboard",
+                                onClick = { currentScreen = "dashboard" }
+                            )
                             NavigationBarItem(
                                 icon = { Icon(Icons.Default.Build, contentDescription = "Equipos") },
                                 label = { Text("Equipos") },
@@ -64,12 +74,19 @@ class MainActivity : ComponentActivity() {
                         modifier = Modifier.fillMaxSize().padding(innerPadding), 
                         color = MaterialTheme.colorScheme.background
                     ) {
-                        if (currentScreen == "equipos") {
-                            val equiposVM: EquiposViewModel = viewModel(factory = EquiposViewModelFactory(equipoDao))
-                            EquiposListScreen(viewModel = equiposVM)
-                        } else {
-                            val prestamosVM: PrestamosViewModel = viewModel(factory = PrestamosViewModelFactory(prestamoDao, equipoDao))
-                            PrestamosListScreen(viewModel = prestamosVM)
+                        when (currentScreen) {
+                            "dashboard" -> {
+                                val dashboardVM: DashboardViewModel = viewModel(factory = DashboardViewModelFactory(equipoDao))
+                                DashboardScreen(viewModel = dashboardVM)
+                            }
+                            "equipos" -> {
+                                val equiposVM: EquiposViewModel = viewModel(factory = EquiposViewModelFactory(equipoDao))
+                                EquiposListScreen(viewModel = equiposVM)
+                            }
+                            "prestamos" -> {
+                                val prestamosVM: PrestamosViewModel = viewModel(factory = PrestamosViewModelFactory(prestamoDao, equipoDao))
+                                PrestamosListScreen(viewModel = prestamosVM)
+                            }
                         }
                     }
                 }

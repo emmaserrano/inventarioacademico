@@ -8,9 +8,9 @@ import com.uam.inventarioacademico.data.local.dao.PrestamoDao
 import com.uam.inventarioacademico.data.local.entity.EquipoEntity
 import com.uam.inventarioacademico.data.local.entity.PrestamoEntity
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -21,22 +21,19 @@ class PrestamosViewModel(
     private val equipoDao: EquipoDao
 ) : ViewModel() {
 
-    private val _prestamos = MutableStateFlow<List<PrestamoEntity>>(emptyList())
-    val prestamos: StateFlow<List<PrestamoEntity>> = _prestamos.asStateFlow()
+    val prestamos: StateFlow<List<PrestamoEntity>> = prestamoDao.getAllPrestamos()
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = emptyList()
+        )
 
-    private val _equipos = MutableStateFlow<List<EquipoEntity>>(emptyList())
-    val equipos: StateFlow<List<EquipoEntity>> = _equipos.asStateFlow()
-
-    init {
-        loadData()
-    }
-
-    private fun loadData() {
-        viewModelScope.launch(Dispatchers.IO) {
-            _prestamos.value = prestamoDao.getAllPrestamos()
-            _equipos.value = equipoDao.getAllEquipos()
-        }
-    }
+    val equipos: StateFlow<List<EquipoEntity>> = equipoDao.getAllEquipos()
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = emptyList()
+        )
 
     fun registrarPrestamo(equipoId: Int, solicitante: String) {
         viewModelScope.launch(Dispatchers.IO) {
@@ -48,8 +45,6 @@ class PrestamosViewModel(
             if (equipo != null) {
                 equipoDao.updateEquipo(equipo.id, equipo.nombre, equipo.categoria, equipo.marca, equipo.numeroSerie, false)
             }
-            
-            loadData()
         }
     }
 
@@ -70,8 +65,6 @@ class PrestamosViewModel(
             if (equipo != null) {
                 equipoDao.updateEquipo(equipo.id, equipo.nombre, equipo.categoria, equipo.marca, equipo.numeroSerie, true)
             }
-            
-            loadData()
         }
     }
 }

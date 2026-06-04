@@ -6,45 +6,35 @@ import androidx.lifecycle.viewModelScope
 import com.uam.inventarioacademico.data.local.dao.EquipoDao
 import com.uam.inventarioacademico.data.local.entity.EquipoEntity
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 class EquiposViewModel(private val equipoDao: EquipoDao) : ViewModel() {
 
-    private val _equipos = MutableStateFlow<List<EquipoEntity>>(emptyList())
-    val equipos: StateFlow<List<EquipoEntity>> = _equipos.asStateFlow()
-
-    init {
-        loadEquipos()
-    }
-
-    private fun loadEquipos() {
-        viewModelScope.launch(Dispatchers.IO) {
-            val list = equipoDao.getAllEquipos()
-            _equipos.value = list
-        }
-    }
+    val equipos: StateFlow<List<EquipoEntity>> = equipoDao.getAllEquipos()
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = emptyList()
+        )
 
     fun addEquipo(nombre: String, categoria: String, marca: String, numeroSerie: String, disponible: Boolean) {
         viewModelScope.launch(Dispatchers.IO) {
             equipoDao.insertEquipo(nombre, categoria, marca, numeroSerie, disponible)
-            loadEquipos()
         }
     }
 
     fun updateEquipo(id: Int, nombre: String, categoria: String, marca: String, numeroSerie: String, disponible: Boolean) {
         viewModelScope.launch(Dispatchers.IO) {
             equipoDao.updateEquipo(id, nombre, categoria, marca, numeroSerie, disponible)
-            loadEquipos()
         }
     }
 
     fun deleteEquipo(id: Int) {
         viewModelScope.launch(Dispatchers.IO) {
             equipoDao.deleteEquipo(id)
-            loadEquipos()
         }
     }
 }

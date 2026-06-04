@@ -1,4 +1,4 @@
-﻿package com.uam.inventarioacademico.data.local.dao
+package com.uam.inventarioacademico.data.local.dao
 
 import androidx.room.Dao
 import androidx.room.Query
@@ -7,7 +7,7 @@ import com.uam.inventarioacademico.data.local.entity.EquipoEntity
 @Dao
 interface EquipoDao{
     @Query("SELECT * FROM equipo")
-    fun getAllEquipos(): List<EquipoEntity>
+    fun getAllEquipos(): kotlinx.coroutines.flow.Flow<List<EquipoEntity>>
 
     @Query("SELECT * FROM equipo WHERE id = :id")
     fun loadEquipoById(id: Int): EquipoEntity
